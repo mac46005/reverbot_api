@@ -1,0 +1,9 @@
+ktor:
+  deployment:
+    port: 4602
+  application:
+    modules:
+      - com.example.SerializationKt.configureSerialization
+      - com.example.PostgresKt.configurePostgres
+      - com.example.DIKt.configureDependencyInjection
+      - com.example.RoutingKt.configureRouting
