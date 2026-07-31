@@ -3,7 +3,7 @@ package com.example.configuration
 import io.ktor.server.application.Application
 // import io.ktor.server.application.log
 import java.sql.Connection
-import java.sqlDriverManager
+import java.sql.DriverManager
 
 fun Application.configureDatabase(): Connection {
     Class.forName("org.postgresql.Driver")

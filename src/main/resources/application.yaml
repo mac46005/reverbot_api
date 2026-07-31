@@ -3,7 +3,14 @@ ktor:
     port: 4602
   application:
     modules:
+      -com.example.configuration.ConfigureRoutingKt.configureRouting
       - com.example.SerializationKt.configureSerialization
       - com.example.PostgresKt.configurePostgres
       - com.example.DIKt.configureDependencyInjection
       - com.example.RoutingKt.configureRouting
+
+postgres:
+  url: "jdbc:postgresql://localhost:5432/reverbot_db"
+  user: postgres
+  password: 46004600
+

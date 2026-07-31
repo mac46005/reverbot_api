@@ -25,6 +25,7 @@ dependencies {
     implementation(libs.h2database.h2)
     implementation(libs.logback.classic)
     implementation(libs.postgresql)
+    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.0")
 
     testImplementation(kotlin("test"))
     testImplementation(ktorLibs.server.testHost)
