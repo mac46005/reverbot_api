@@ -4,10 +4,9 @@ ktor:
   application:
     modules:
       - com.example.configuration.ConfigureDatabaseKt.configureDatabase
-      - com.example.SerializationKt.configureSerialization
-      - com.example.PostgresKt.configurePostgres
-      - com.example.DIKt.configureDependencyInjection
-      - com.example.RoutingKt.configureRouting
+      - com.example.configurations.ConfigureSerializationKt.configureSerialization
+      - com.example.configurations.ConfigureDependencyInjectionKt.configureDependencyInjection
+      - com.example.configurations.ConfigureRoutingKt.configureRouting
 
 postgres:
   url: "jdbc:postgresql://localhost:5432/reverbot_db"
