@@ -3,7 +3,7 @@ ktor:
     port: 4602
   application:
     modules:
-      -com.example.configuration.ConfigureRoutingKt.configureRouting
+      - com.example.configuration.ConfigureDatabaseKt.configureDatabase
       - com.example.SerializationKt.configureSerialization
       - com.example.PostgresKt.configurePostgres
       - com.example.DIKt.configureDependencyInjection
