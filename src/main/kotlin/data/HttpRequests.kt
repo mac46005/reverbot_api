@@ -12,3 +12,7 @@ data class CreateJosePlaySoonRequest(
 )
 
 
+
+
+@Serializable
+data class CreateJoseVoiceRequest(val timestamp: LocalDateTime = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()))
