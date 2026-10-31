@@ -19,4 +19,5 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "reverbot_api"
+includeBuild("../preciadoapiutilities")
 

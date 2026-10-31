@@ -16,6 +16,8 @@ kotlin {
     jvmToolchain(21)
 }
 dependencies {
+    implementation("com.preciado:preciadoapiutilities:1.1.0")
+    implementation("com.zaxxer:HikariCP:6.2.1")
     implementation(ktorLibs.serialization.kotlinx.json)
     implementation(ktorLibs.server.config.yaml)
     implementation(ktorLibs.server.contentNegotiation)

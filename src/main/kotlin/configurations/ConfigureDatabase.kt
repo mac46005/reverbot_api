@@ -8,7 +8,7 @@ import java.sql.DriverManager
 fun Application.configureDatabase(): Connection {
     Class.forName("org.postgresql.Driver")
     val url = environment.config.property("postgres.url").getString()
-    val user = environment.config.property("postgres.user").getString()
+    val user = environment.config.property("postgres.username").getString()
     val password = environment.config.property("postgres.password").getString()
 
     return DriverManager.getConnection(url, user, password)

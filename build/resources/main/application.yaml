@@ -9,7 +9,7 @@ ktor:
       - com.example.configurations.ConfigureRoutingKt.configureRouting
 
 postgres:
-  url: "jdbc:postgresql://localhost:5432/reverbot_db"
-  user: postgres
-  password: 46004600
+  url: "$REVERBOT_DB_URL"
+  username: "$REVERBOT_DB_USERNAME"
+  password: "$REVERBOT_DB_PASSWORD"
 
