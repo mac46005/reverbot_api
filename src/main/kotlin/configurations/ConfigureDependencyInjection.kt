@@ -1,6 +1,6 @@
 package com.example.configurations
 
-import com.example.data.RocketLeagueTalliesData
+import com.example.data.rocketleague.RocketLeagueTalliesData
 import com.example.data.createHikariDataSource
 import com.example.services.RocketLeagueTallyManagementService
 import io.ktor.server.application.Application

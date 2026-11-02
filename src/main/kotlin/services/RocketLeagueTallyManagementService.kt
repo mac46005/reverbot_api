@@ -1,9 +1,9 @@
 package com.example.services
 
-import com.example.data.RocketLeagueTalliesData
-import com.example.models.RocketLeagueGameMode
-import com.example.models.RocketLeagueGameResult
-import com.example.models.RocketLeagueTodaysGameCounts
+import com.example.data.rocketleague.RocketLeagueTalliesData
+import com.example.models.rocketleague.GameMode
+import com.example.models.rocketleague.GameResult
+import com.example.models.rocketleague.TodaysGameCounts
 import java.time.Clock
 import java.time.Instant
 
@@ -11,9 +11,9 @@ class RocketLeagueTallyManagementService(
     private val rocketLeagueTalliesData: RocketLeagueTalliesData,
     private val clock: Clock
 ) {
-    suspend fun createGameResult(mode: RocketLeagueGameMode, isWin: Boolean): Long {
+    suspend fun createGameResult(mode: GameMode, isWin: Boolean): Long {
         return rocketLeagueTalliesData.createGameResult(
-            RocketLeagueGameResult(
+            GameResult(
                 mode = mode,
                 isWin = isWin
             )
@@ -21,27 +21,30 @@ class RocketLeagueTallyManagementService(
     }
 
 
-    suspend fun getGameResultsFromToday(): List<RocketLeagueGameResult> {
+
+
+    suspend fun getUnrankedGameResultsFromToday(): List<GameResult> {
         val today = Instant.now(clock)
-        return rocketLeagueTalliesData.getGameResultsFromToday(
-            today
-        )
+        return rocketLeagueTalliesData.getUnrankedGameResultsFromToday(today)
     }
 
-    suspend fun getGameCountsForToday(): RocketLeagueTodaysGameCounts {
+    suspend fun getUnrankedGameCountsForToday(): TodaysGameCounts {
         val today = Instant.now(clock)
-        return rocketLeagueTalliesData.getGameCountsForToday(
-            today
-        )
+
+        return rocketLeagueTalliesData.getUnrankedGameCountsForToday(today)
     }
 
-    suspend fun updateGameResult(id: Long, mode: RocketLeagueGameMode, isWin: Boolean): Boolean {
+
+
+
+
+    suspend fun updateGameResult(id: Long, mode: GameMode, isWin: Boolean): Boolean {
         require(id > 0) {
             "Please provide an existing game id"
         }
 
         return rocketLeagueTalliesData.updateGameResult(
-            RocketLeagueGameResult(
+            GameResult(
                 id = id,
                 mode = mode,
                 isWin = isWin

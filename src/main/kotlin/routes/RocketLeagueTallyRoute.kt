@@ -1,15 +1,13 @@
 package com.example.routes
 
-import com.example.data.RocketLeagueTalliesData
-import com.example.responses.CreateRocketLeagueGameResultRequest
-import com.example.responses.UpdateRocketLeagueGameResultRequest
-import com.example.responses.toDto
-import com.example.responses.toDtoList
+import com.example.responses.rocketleague.CreateGameResultRequest
+import com.example.responses.rocketleague.UpdateGameResultRequest
+import com.example.responses.rocketleague.toDto
+import com.example.responses.rocketleague.toDtoList
 import com.example.services.RocketLeagueTallyManagementService
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
-import io.ktor.server.response.respondText
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
@@ -22,7 +20,7 @@ fun Route.rocketLeagueTallyRoute(
 ) {
     route("/rocket-league-tally") {
         post {
-            val req = call.receive<CreateRocketLeagueGameResultRequest>()
+            val req = call.receive<CreateGameResultRequest>()
 
             val id = rocketLeagueTallyManagementService.createGameResult(
                 req.mode,
@@ -32,21 +30,20 @@ fun Route.rocketLeagueTallyRoute(
             return@post call.respond(HttpStatusCode.Created, id)
         }
 
-        get("/todays-games") {
-            val games = rocketLeagueTallyManagementService.getGameResultsFromToday()
-
-            return@get call.respond(games.toDtoList())
+        get("/todays-unranked-counts") {
+            val games = rocketLeagueTallyManagementService.getUnrankedGameCountsForToday()
+            return@get call.respond(games.toDto())
         }
 
-        get("/todays-counts") {
-            val counts = rocketLeagueTallyManagementService.getGameCountsForToday()
+        get("/todays-unranked-games") {
+            val counts = rocketLeagueTallyManagementService.getUnrankedGameResultsFromToday()
 
-            return@get call.respond(counts.toDto())
+            return@get call.respond(counts.toDtoList())
         }
 
         put("/{id}") {
             val id = call.parameters["id"]?.toLongOrNull() ?: return@put call.respond(HttpStatusCode.BadRequest)
-            val req = call.receive<UpdateRocketLeagueGameResultRequest>()
+            val req = call.receive<UpdateGameResultRequest>()
 
             val isUpdated = rocketLeagueTallyManagementService.updateGameResult(
                 id,
