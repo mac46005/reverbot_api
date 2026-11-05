@@ -23,6 +23,29 @@ class RocketLeagueTalliesData(
     dataSource
 ) {
 
+    private fun getPastMonth(today: Instant): Instant {
+        val zone = ZoneId.of("America/Chicago")
+        val date = today.atZone(zone).toLocalDate()
+        val pastMonth = date
+            .atDay(1)
+            .atStartOfDay(zone)
+            .toInstant()
+        
+        return pastMonth
+    }
+
+    private fun getPastMonthUpToToday(pastNumberOfMonths: Int, today: Instant): Pair<Instant, Instant> {
+        val zone = ZoneId.of("America/Chicago")
+        val date = today.atZone(zone).toLocalDate()
+        val pastXMonths = date
+            .plusMonths(pastNumberOfMonth * -1)
+            .atDay(1)
+            .atStartOfDay(zone)
+            .toInstant()
+        
+        return Pair(pastNumberOfMonths, today)    
+    }
+
     private fun getBeginningOfDayAndBeginningOfNextDay(today: Instant): Pair<Instant, Instant> {
         val zone = ZoneId.of("America/Chicago")
 
@@ -67,12 +90,16 @@ class RocketLeagueTalliesData(
                 ),
                 WriteColumn(
                     "is_win"
-                )
+                ),
+		        WriteColumn(
+			        "mvp"
+		        )
             ),
             setValues = { statement ->
                 var colCount = 1
                 statement.setString(colCount++,result.mode.mode)
                 statement.setBoolean(colCount++, result.isWin)
+		        statement.setString(colCount++, result.mvp)
             },
             readId = { resultSet ->
                 getIdLong(resultSet)
@@ -87,9 +114,10 @@ class RocketLeagueTalliesData(
         jdbcCrudOperations.dataSource.connection.use { connection ->
             val selectStatement = """
                 SELECT 
-                    id, 
+                    id,
                     mode, 
-                    is_win, 
+                    is_win,
+		            mvp,
                     created_at
                 FROM ${jdbcCrudOperations.tableName}
                     WHERE created_at >= ?
@@ -183,6 +211,7 @@ class RocketLeagueTalliesData(
                     id,
                     mode,
                     is_win,
+                    mvp,
                     created_at
                 FROM ${jdbcCrudOperations.tableName}
                     WHERE mode = ?
@@ -218,7 +247,6 @@ class RocketLeagueTalliesData(
             }
         }
 
-    // TODO Add MVP
     suspend fun getUnrankedGameCountsForToday(today: Instant): TodaysGameCounts =
         withContext(Dispatchers.IO) {
             jdbcCrudOperations.dataSource.connection.use { connection ->
@@ -284,9 +312,74 @@ class RocketLeagueTalliesData(
 //        }
 //    }
 
+suspend fun getUnrankedGameResultsForPastMonth(today: Instant): List<GameResult> = withContext(Dispatchers.IO) {
+    jdbcCrudOperations.dataSource.connection.use { connection -> 
+        val selectStatement = """
+            SELECT
+                id,
+                mode,
+                is_win,
+                mvp,
+                created_at
+            FROM ${jdbcCrudOperations.tableName}
+            WHERE mode = 'UNRANKED'
+                AND created_at >= ?
+                AND created_at < ?;
+        """
+
+        connection.prepareStatement(selectStatement).use { statement ->
+            var colCount = 1
+            val pastMonth = getPastMonth(today)
+            statement.setInstant(colCount++, pastMonth)
+            statement.setInstant(colCount++, today)
+
+            statement.executeQuery().use { resultSet ->
+                val list = mutableListOf<GameResult>()
+                
+                while (resultSet.next()) {
+                    val gameResult = GameResultDataMapper.getFromResultSet(resultSet = resultSet)
+                        ?: throw NotFoundException("Unable to retrieve GameResult from getUnrankedGameResultsForPastMonth in rocket_league_tallies database")
+
+                    list.add(
+                        gameResult
+                    )
+                }
+            }
+        }
+    }
+}
 
 
+suspend fun getUnrankedGameCountsForPastMonth(today: Instant): TodaysGameCounts = withContext(Dispatchers.IO) {
+    jdbcCrudOperations.dataSource.connection.use { connection -> 
+        val selectStatement = """
+            SELECT
+                COUNT(*) FILTER (WHERE is_win = TRUE AND mode = 'UNRANKED') AS wins,
+                COUNT(*) FILTER (WHERE is_win = FALSE AND mode = 'UNRANKED') AS losses
+            FROM ${jdbcCrudOperations.tableName}
+            WHERE created_at >= ?
+                AND created_at < ?
+        """
 
+        connection.prepareStatement(selectStatement).use { statement ->
+            var colCount = 1
+            val pastMonth = getPastMonth(today)
+            statement.setInstant(colCount++, pastMonth)
+            statement.setInstant(colCount++, today)
+
+            statement.executeQuery().use { resultSet ->
+                if (resultSet.next()) {
+                    TodaysGameCounts(
+                        wins = resultSet.getLong("wins"),
+                        losses = resultSet.getLong("losses")
+                    )
+                } else {
+                    TodaysGameCounts()
+                }
+            }
+        }
+    }
+}
 
 
 
@@ -304,6 +397,9 @@ class RocketLeagueTalliesData(
                 ),
                 WriteColumn(
                     "is_win"
+                ),
+                WriteColumn(
+                    "mvp"
                 )
             ),
             predicates = listOf(

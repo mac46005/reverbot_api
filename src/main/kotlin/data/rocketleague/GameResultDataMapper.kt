@@ -26,6 +26,7 @@ object GameResultDataMapper: DataMapper<GameResult>() {
             id,
             GameMode.valueOf(resultSet.getString("mode")),
             resultSet.getBoolean("is_win"),
+	    resultSet.getString("mvp"),
             resultSet.getInstant("created_at")
         )
     }

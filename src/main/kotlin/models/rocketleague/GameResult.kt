@@ -7,5 +7,6 @@ data class GameResult(
     override val id: Long = 0,
     val mode: GameMode = GameMode.UNRANKED,
     val isWin: Boolean = false,
+    val mvp: String = "",
     val createdAt: Instant = Instant.now()
 ): IModel<Long>
