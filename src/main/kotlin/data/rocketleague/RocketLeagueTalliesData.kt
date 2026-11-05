@@ -34,7 +34,7 @@ class RocketLeagueTalliesData(
         return pastMonth
     }
 
-    private fun getPastMonthUpToToday(pastNumberOfMonths: Int, today: Instant): Pair<Instant, Instant> {
+    private fun getPastXMonthUpToToday(pastNumberOfMonths: Int, today: Instant): Pair<Instant, Instant> {
         val zone = ZoneId.of("America/Chicago")
         val date = today.atZone(zone).toLocalDate()
         val pastXMonths = date
@@ -110,6 +110,48 @@ class RocketLeagueTalliesData(
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    // could remove
     suspend fun getGameResultsFromToday(today: Instant): List<GameResult> = withContext(Dispatchers.IO) {
         jdbcCrudOperations.dataSource.connection.use { connection ->
             val selectStatement = """
@@ -152,6 +194,7 @@ class RocketLeagueTalliesData(
         }
     }
 
+    // TODO remove
     suspend fun getGameCountsForToday(today: Instant): TodaysGameCounts = withContext(Dispatchers.IO) {
         jdbcCrudOperations.dataSource.connection.use { connection ->
             val selectStatement = """
@@ -184,6 +227,31 @@ class RocketLeagueTalliesData(
             }
         }
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -247,6 +315,7 @@ class RocketLeagueTalliesData(
             }
         }
 
+        // change outut to GameCounts
     suspend fun getUnrankedGameCountsForToday(today: Instant): TodaysGameCounts =
         withContext(Dispatchers.IO) {
             jdbcCrudOperations.dataSource.connection.use { connection ->
@@ -350,7 +419,7 @@ suspend fun getUnrankedGameResultsForPastMonth(today: Instant): List<GameResult>
 }
 
 
-suspend fun getUnrankedGameCountsForPastMonth(today: Instant): TodaysGameCounts = withContext(Dispatchers.IO) {
+suspend fun getUnrankedGameCountsForPastMonth(today: Instant): GameCounts = withContext(Dispatchers.IO) {
     jdbcCrudOperations.dataSource.connection.use { connection -> 
         val selectStatement = """
             SELECT
@@ -369,7 +438,7 @@ suspend fun getUnrankedGameCountsForPastMonth(today: Instant): TodaysGameCounts 
 
             statement.executeQuery().use { resultSet ->
                 if (resultSet.next()) {
-                    TodaysGameCounts(
+                    GameCounts(
                         wins = resultSet.getLong("wins"),
                         losses = resultSet.getLong("losses")
                     )
