@@ -267,22 +267,22 @@ class RocketLeagueTalliesData(
 
 
     // TODO Complete /past-three-months-unranked
-    suspend fun getUnrankedGameResultsForMonth(month: Instant): List<GameCounts> {
-        jdbcCrudOperations.dataSource.connection.use { connection ->
-            val selectStatement = """
-                SELECT
-                    COUNT(*) FILTER (WHERE is_win = TRUE AND mode = 'UNRANKED'),
-                    COUNT(*) FILTER (WHERE is_win = FALSE AND mode = 'UNRANKED')
-                FROM ${jdbcCrudOperations.tableName}
-                WHERE created_at >= ?
-            """.trimIndent()
-
-
-            connection.prepareStatement(selectStatement).use { statement ->
-                var colCount = 1
-            }
-        }
-    }
+//    suspend fun getUnrankedGameResultsForMonth(month: Instant): List<GameCounts> {
+//        jdbcCrudOperations.dataSource.connection.use { connection ->
+//            val selectStatement = """
+//                SELECT
+//                    COUNT(*) FILTER (WHERE is_win = TRUE AND mode = 'UNRANKED'),
+//                    COUNT(*) FILTER (WHERE is_win = FALSE AND mode = 'UNRANKED')
+//                FROM ${jdbcCrudOperations.tableName}
+//                WHERE created_at >= ?
+//            """.trimIndent()
+//
+//
+//            connection.prepareStatement(selectStatement).use { statement ->
+//                var colCount = 1
+//            }
+//        }
+//    }
 
 
 
