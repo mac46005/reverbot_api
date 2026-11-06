@@ -41,6 +41,17 @@ fun Route.rocketLeagueTallyRoute(
             return@get call.respond(counts.toDtoList())
         }
 
+
+        get("/past-month-games") {
+            val games = rocketLeagueTallyManagementService.getUnrankedGameResultsFromToday()
+            return@get call.respond(games.toDtoList())
+        }
+
+        get("/past-month-game-counts") {
+            val counts = rocketLeagueTallyManagementService.getUnrankedGameCountsForPastMonth()
+            return@get call.respond(counts.toDto())
+        }
+
         put("/{id}") {
             val id = call.parameters["id"]?.toLongOrNull() ?: return@put call.respond(HttpStatusCode.BadRequest)
             val req = call.receive<UpdateGameResultRequest>()

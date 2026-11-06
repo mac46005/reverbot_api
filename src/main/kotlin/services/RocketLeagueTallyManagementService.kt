@@ -1,9 +1,9 @@
 package com.example.services
 
 import com.example.data.rocketleague.RocketLeagueTalliesData
+import com.example.models.rocketleague.GameCounts
 import com.example.models.rocketleague.GameMode
 import com.example.models.rocketleague.GameResult
-import com.example.models.rocketleague.TodaysGameCounts
 import java.time.Clock
 import java.time.Instant
 
@@ -28,7 +28,7 @@ class RocketLeagueTallyManagementService(
         return rocketLeagueTalliesData.getUnrankedGameResultsFromToday(today)
     }
 
-    suspend fun getUnrankedGameCountsForToday(): TodaysGameCounts {
+    suspend fun getUnrankedGameCountsForToday(): GameCounts {
         val today = Instant.now(clock)
 
         return rocketLeagueTalliesData.getUnrankedGameCountsForToday(today)
@@ -37,6 +37,17 @@ class RocketLeagueTallyManagementService(
 
 
 
+
+
+    suspend fun getUnrankedGameResultsForPastMonth(): List<GameResult> {
+        val today = Instant.now(clock)
+        return rocketLeagueTalliesData.getUnrankedGameResultsForPastMonth(today)
+    }
+
+    suspend fun getUnrankedGameCountsForPastMonth(): GameCounts {
+        val today = Instant.now(clock)
+        return rocketLeagueTalliesData.getUnrankedGameCountsForPastMonth(today)
+    }
 
     suspend fun updateGameResult(id: Long, mode: GameMode, isWin: Boolean): Boolean {
         require(id > 0) {
