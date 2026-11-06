@@ -3,6 +3,7 @@ package com.example.data.rocketleague
 import com.example.models.rocketleague.GameCounts
 import com.example.models.rocketleague.GameMode
 import com.example.models.rocketleague.GameResult
+import com.example.models.rocketleague.MvpInfo
 import com.preciado.data.column.WriteColumn
 import com.preciado.data.sqlmodifier.getIdLong
 import com.preciado.data.utilities.setInstant
@@ -16,7 +17,7 @@ import javax.sql.DataSource
 
 class RocketLeagueTalliesData(
     dataSource: DataSource
-): Data<Long, GameResult>(
+) : Data<Long, GameResult>(
     "rocket_league_tallies",
     "rlt",
     dataSource
@@ -28,11 +29,11 @@ class RocketLeagueTalliesData(
             .minusMonths(1)
             .atStartOfDay(zone)
             .toInstant()
-        
+
         return pastMonth
     }
 
-    private fun getPastXMonthUpToToday(pastNumberOfMonths: Long, today: Instant): Instant{
+    private fun getPastXMonthUpToToday(pastNumberOfMonths: Long, today: Instant): Instant {
         require(pastNumberOfMonths > 0) {
             "Please input a positive number"
         }
@@ -42,7 +43,7 @@ class RocketLeagueTalliesData(
             .minusMonths(pastNumberOfMonths)
             .atStartOfDay(zone)
             .toInstant()
-        
+
         return pastXMonths
     }
 
@@ -73,99 +74,21 @@ class RocketLeagueTalliesData(
                 WriteColumn(
                     "is_win"
                 ),
-		        WriteColumn(
-			        "mvp"
-		        )
+                WriteColumn(
+                    "mvp"
+                )
             ),
             setValues = { statement ->
                 var colCount = 1
-                statement.setString(colCount++,result.mode.mode)
+                statement.setString(colCount++, result.mode.mode)
                 statement.setBoolean(colCount++, result.isWin)
-		        statement.setString(colCount++, result.mvp)
+                statement.setString(colCount++, result.mvp)
             },
             readId = { resultSet ->
                 getIdLong(resultSet)
             }
         )
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
     suspend fun getUnrankedGameResultsFromToday(today: Instant): List<GameResult> =
@@ -212,7 +135,7 @@ class RocketLeagueTalliesData(
             }
         }
 
-        // change outut to GameCounts
+    // change outut to GameCounts
     suspend fun getUnrankedGameCountsForToday(today: Instant): GameCounts =
         withContext(Dispatchers.IO) {
             jdbcCrudOperations.dataSource.connection.use { connection ->
@@ -250,18 +173,53 @@ class RocketLeagueTalliesData(
 
 
 
+    suspend fun getUnrankedMvpRatiosForToday(today: Instant): List<MvpInfo> = withContext(Dispatchers.IO) {
+        jdbcCrudOperations.dataSource.connection.use { connection ->
+            val selectStatement = """
+                SELECT
+                    mvp,
+                    COUNT(*) AS mvp_count,
+                    COUNT(*) * 100.0 / SUM(COUNT(*)) OVER () AS mvp_percentage
+                FROM ${jdbcCrudOperations.tableName}
+                WHERE mode = 'UNRANKED'
+                    AND created_at >= ?
+                    AND created_at < ?
+                    AND mvp IS NOT NULL
+                GROUP BY mvp
+                ORDER BY mvp_count DESC;
+            """.trimIndent()
+
+            connection.prepareStatement(selectStatement).use { statement ->
+
+                var colCount = 1
+                val (startOfDay, startOfNextDay) = getBeginningOfDayAndBeginningOfNextDay(today)
+
+                statement.setInstant(colCount++, startOfDay)
+                statement.setInstant(colCount++, startOfNextDay)
 
 
 
+                statement.executeQuery().use { resultSet ->
+                    val list = mutableListOf<MvpInfo>()
+                    while (resultSet.next()) {
+                        list.add(
+                            MvpInfo(
+                                resultSet.getString("mvp"),
+                                resultSet.getLong("mvp_count"),
+                                resultSet.getDouble("mvp_percentage")
+                            )
+                        )
 
+                    }
+                    return@withContext list
+                }
+            }
+        }
+    }
 
-
-
-
-
-suspend fun getUnrankedGameResultsForPastMonth(today: Instant): List<GameResult> = withContext(Dispatchers.IO) {
-    jdbcCrudOperations.dataSource.connection.use { connection -> 
-        val selectStatement = """
+    suspend fun getUnrankedGameResultsForPastMonth(today: Instant): List<GameResult> = withContext(Dispatchers.IO) {
+        jdbcCrudOperations.dataSource.connection.use { connection ->
+            val selectStatement = """
             SELECT
                 id,
                 mode,
@@ -274,34 +232,34 @@ suspend fun getUnrankedGameResultsForPastMonth(today: Instant): List<GameResult>
                 AND created_at < ?;
         """
 
-        connection.prepareStatement(selectStatement).use { statement ->
-            var colCount = 1
-            val pastMonth = getPastMonth(today)
-            statement.setInstant(colCount++, pastMonth)
-            statement.setInstant(colCount++, today)
+            connection.prepareStatement(selectStatement).use { statement ->
+                var colCount = 1
+                val pastMonth = getPastMonth(today)
+                statement.setInstant(colCount++, pastMonth)
+                statement.setInstant(colCount++, today)
 
-            statement.executeQuery().use { resultSet ->
-                val list = mutableListOf<GameResult>()
-                
-                while (resultSet.next()) {
-                    val gameResult = GameResultDataMapper.getFromResultSet(resultSet = resultSet)
-                        ?: throw NotFoundException("Unable to retrieve GameResult from getUnrankedGameResultsForPastMonth in rocket_league_tallies database")
+                statement.executeQuery().use { resultSet ->
+                    val list = mutableListOf<GameResult>()
 
-                    list.add(
-                        gameResult
-                    )
+                    while (resultSet.next()) {
+                        val gameResult = GameResultDataMapper.getFromResultSet(resultSet = resultSet)
+                            ?: throw NotFoundException("Unable to retrieve GameResult from getUnrankedGameResultsForPastMonth in rocket_league_tallies database")
+
+                        list.add(
+                            gameResult
+                        )
+                    }
+
+                    return@withContext list
                 }
-
-                return@withContext list
             }
         }
     }
-}
 
 
-suspend fun getUnrankedGameCountsForPastMonth(today: Instant): GameCounts = withContext(Dispatchers.IO) {
-    jdbcCrudOperations.dataSource.connection.use { connection -> 
-        val selectStatement = """
+    suspend fun getUnrankedGameCountsForPastMonth(today: Instant): GameCounts = withContext(Dispatchers.IO) {
+        jdbcCrudOperations.dataSource.connection.use { connection ->
+            val selectStatement = """
             SELECT
                 COUNT(*) FILTER (WHERE is_win = TRUE) AS wins,
                 COUNT(*) FILTER (WHERE is_win = FALSE) AS losses
@@ -311,32 +269,25 @@ suspend fun getUnrankedGameCountsForPastMonth(today: Instant): GameCounts = with
                 AND created_at < ?
         """
 
-        connection.prepareStatement(selectStatement).use { statement ->
-            var colCount = 1
-            val pastMonth = getPastMonth(today)
-            statement.setInstant(colCount++, pastMonth)
-            statement.setInstant(colCount++, today)
+            connection.prepareStatement(selectStatement).use { statement ->
+                var colCount = 1
+                val pastMonth = getPastMonth(today)
+                statement.setInstant(colCount++, pastMonth)
+                statement.setInstant(colCount++, today)
 
-            statement.executeQuery().use { resultSet ->
-                if (resultSet.next()) {
-                    GameCounts(
-                        wins = resultSet.getLong("wins"),
-                        losses = resultSet.getLong("losses")
-                    )
-                } else {
-                    GameCounts()
+                statement.executeQuery().use { resultSet ->
+                    if (resultSet.next()) {
+                        GameCounts(
+                            wins = resultSet.getLong("wins"),
+                            losses = resultSet.getLong("losses")
+                        )
+                    } else {
+                        GameCounts()
+                    }
                 }
             }
         }
     }
-}
-
-
-
-
-
-
-
 
 
     suspend fun updateGameResult(result: GameResult): Boolean {

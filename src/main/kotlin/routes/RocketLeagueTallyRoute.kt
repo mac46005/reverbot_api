@@ -24,7 +24,8 @@ fun Route.rocketLeagueTallyRoute(
 
             val id = rocketLeagueTallyManagementService.createGameResult(
                 req.mode,
-                req.isWin
+                req.isWin,
+                req.mvp
             )
 
             return@post call.respond(HttpStatusCode.Created, id)
@@ -43,7 +44,7 @@ fun Route.rocketLeagueTallyRoute(
 
 
         get("/past-month-games") {
-            val games = rocketLeagueTallyManagementService.getUnrankedGameResultsFromToday()
+            val games = rocketLeagueTallyManagementService.getUnrankedGameResultsForPastMonth()
             return@get call.respond(games.toDtoList())
         }
 
@@ -72,11 +73,7 @@ fun Route.rocketLeagueTallyRoute(
         delete("/{id}") {
             val id = call.parameters["id"]?.toLongOrNull() ?: return@delete call.respond(HttpStatusCode.BadRequest)
             val isDeleted = rocketLeagueTallyManagementService.deleteGameResult(id)
-            if (isDeleted) {
-                return@delete call.respond(HttpStatusCode.NoContent)
-            } else {
-                return@delete call.respond(HttpStatusCode.NotFound)
-            }
+            return@delete call.respond(isDeleted)
         }
     }
 }

@@ -11,6 +11,7 @@ data class RocketLeagueGameResultDto(
     val id: Long,
     val mode: GameMode,
     val isWin: Boolean,
+    val mvp: String,
     val createdAt: Instant
 )
 
@@ -21,6 +22,7 @@ fun GameResult.toDto(): RocketLeagueGameResultDto {
         id = this.id,
         mode = this.mode,
         isWin = this.isWin,
+        mvp = this.mvp,
         createdAt = this.createdAt.toKotlinInstant()
     )
 }

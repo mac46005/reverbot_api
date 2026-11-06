@@ -4,6 +4,7 @@ import com.example.data.rocketleague.RocketLeagueTalliesData
 import com.example.models.rocketleague.GameCounts
 import com.example.models.rocketleague.GameMode
 import com.example.models.rocketleague.GameResult
+import com.example.models.rocketleague.MvpInfo
 import java.time.Clock
 import java.time.Instant
 
@@ -11,11 +12,12 @@ class RocketLeagueTallyManagementService(
     private val rocketLeagueTalliesData: RocketLeagueTalliesData,
     private val clock: Clock
 ) {
-    suspend fun createGameResult(mode: GameMode, isWin: Boolean): Long {
+    suspend fun createGameResult(mode: GameMode, isWin: Boolean, mvp: String): Long {
         return rocketLeagueTalliesData.createGameResult(
             GameResult(
                 mode = mode,
-                isWin = isWin
+                isWin = isWin,
+                mvp = mvp
             )
         )
     }
@@ -69,5 +71,10 @@ class RocketLeagueTallyManagementService(
         }
 
         return rocketLeagueTalliesData.deleteGameResult(id)
+    }
+
+    suspend fun getUnrankedMvpRationsForToday(): List<MvpInfo> {
+        val today = Instant.now(clock)
+        return rocketLeagueTalliesData.getUnrankedMvpRatiosForToday(today)
     }
 }

@@ -6,5 +6,6 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class CreateGameResultRequest(
     val mode: GameMode,
-    val isWin: Boolean
+    val isWin: Boolean,
+    val mvp: String
 )
